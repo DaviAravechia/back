@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
-import dj_database_url
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +26,7 @@ SECRET_KEY = 'django-insecure-!p5(=^nt4^2@f@aj$o6o@0979tqco8#==xc8ut@hj%i_xfpf+y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["http://localhost:8000/", "https://back-vlzn.onrender.com"]
 
 
 # Application definition
@@ -44,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'decouple',
+
 ]
 
 MIDDLEWARE = [
@@ -80,6 +80,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+from decouple import config
+import dj_database_url
 
 DB_URL = config('DB_URL', default=os.getenv('DB_URL', None))
 print("Valor de DB_URL:", DB_URL)
@@ -131,7 +134,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOWED_ORIGINS = [ "http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = [ "http://localhost:5173/", "https://front-4smi.onrender.com"]
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

@@ -1,5 +1,5 @@
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
+
 
 
 # Create your models here.
@@ -7,7 +7,7 @@ class Pacientes(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     nome = models.CharField(max_length=255)
     data_nascimento = models.DateField()
-    telefone = PhoneNumberField()
+    telefone = models.IntegerField()
     email = models.EmailField()
     historico_medico = models.TextField()  # Ajustado para TextField'
     cpf = models.CharField(max_length=11,)
