@@ -11,7 +11,7 @@ class Meta:
     fields = ('username', 'password')
 
     def create(self, validated_data):
-    Pacientes = Pacientes(**validated_data)
-    pacientes.set_password(validated_data['password'])
-    pacientes.save()
-    return pacientes
+        pacientes = Pacientes(**validated_data)
+        pacientes.set_password(validated_data['password'])
+        pacientes.save()
+        return pacientes
