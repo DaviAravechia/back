@@ -3,3 +3,13 @@
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+
+
+PAsso a passo para acessar  Back :  
+Instalar:  python -m venv venv 
+acessar a venv - 
+.venv\Scripts\activate
+pip install -r requirements.txt 
+python manage.py runserver
+Enviar para o GIT:
+
