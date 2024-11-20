@@ -19,3 +19,9 @@ git checkout dev (entrar na branch)
 git add .(adicionar as alterações)
 git commit -m " alterações"
 git push origin dev(para enviar )
+
+
+Atualizando os dados do Git para o VScode
+git checkout dev (entrando na Branch)
+git pull origin dev(atualizando a branch no VScode)
+
