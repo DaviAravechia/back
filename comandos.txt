@@ -11,5 +11,14 @@ acessar a venv -
 .venv\Scripts\activate
 pip install -r requirements.txt 
 python manage.py runserver
-Enviar para o GIT:
 
+
+
+Enviar para o GIT:
+git checkout dev (entrar na branch)
+
+git add .(adicionar as alterações)
+
+git commit -m " alterações"
+
+git push origin dev(para enviar )
