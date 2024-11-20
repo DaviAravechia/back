@@ -26,15 +26,18 @@ SECRET_KEY = 'django-insecure-!p5(=^nt4^2@f@aj$o6o@0979tqco8#==xc8ut@hj%i_xfpf+y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["http://localhost:8000/", "https://back-vlzn.onrender.com"]
+# ALLOWED_HOSTS = ["http://localhost:8000/", "https://back-vlzn.onrender.com"]
 
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework_simplejwt',
+    'drf_yasg',
+    'API',
     'corsheaders',
     'gunicorn',
-    'API',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'decouple',
-    'rest_framework_simplejwt',
 
 ]
 
@@ -135,7 +137,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOWED_ORIGINS = [ "http://localhost:5173/", "https://front-4smi.onrender.com"]
+CORS_ALLOWED_ORIGINS = [ "https://front-4smi.onrender.com"]
+
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
