@@ -44,7 +44,7 @@ def postpacientes(request):
     if serializer.is_valid():
         paciente = serializer.save()
         return Response(
-            {"id": paciente.uuid, "nome": paciente.nome},
+            # {"id": paciente.uuid, "nome": paciente.nome},
             status=status.HTTP_201_CREATED
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
