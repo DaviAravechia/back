@@ -40,7 +40,7 @@ def postpacientes(request):
     """
     View para criar um novo paciente associado a um usuário.
     """
-    serializer = PacientesSerializer(data=request.data)
+    serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         paciente = serializer.save()
         return Response(
