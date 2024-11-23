@@ -9,9 +9,12 @@ class Pacientes(models.Model):
     user_id = models.OneToOneField(
         User,  # Relaciona um paciente ao modelo User
         on_delete=models.CASCADE,  # Exclui o paciente se o usuário for excluído
-        related_name='paciente'  # Facilita consultas reversas
+        related_name='paciente',
+        # Facilita consultas reversas,
+        null = True,
+        blank=True
     )
-    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, )
     nome = models.CharField(max_length=255)
     data_nascimento = models.DateField()
     telefone = models.CharField(
