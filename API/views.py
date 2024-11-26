@@ -6,6 +6,8 @@ from drf_yasg.utils import swagger_auto_schema
 from .serializers import UserSerializer
 from .models import Pacientes
 from django.http import JsonResponse, HttpResponse
+from serializers import PacientesSerializer
+
 
 
 @swagger_auto_schema(
@@ -29,11 +31,11 @@ def register(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @swagger_auto_schema(
-#     methods=['POST'],
-#     request_body=PacientesSerializer,
-#     tags=['pacientes'],
-# )
+@swagger_auto_schema(
+    methods=['POST'],
+    request_body=PacientesSerializer,
+    tags=['pacientes'],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def postpacientes(request):
