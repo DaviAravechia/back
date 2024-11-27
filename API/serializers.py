@@ -16,9 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-# class PacientesSerializer(serializers.ModelSerializer):
-#     # Relaciona o usuário com o paciente
-#     user_id = UserSerializer()
+class PacientesSerializer(serializers.ModelSerializer):
+    # Relaciona o usuário com o paciente
+    user_id = UserSerializer()
 
     class Meta:
         model = Pacientes

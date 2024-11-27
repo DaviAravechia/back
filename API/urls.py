@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import register, postpacientes, api_root, empty_favicon
+from .views import login, register, PacientesListCreateView, PacienteDetailView
 
 urlpatterns = [
-    path('', api_root, name='api_root'),  # Rota base para '/api/'
-    path('auth/register/', register, name='register'),  # Registro de usuários
-    path('restrito/pacientes/', postpacientes, name='postpacientes'),  # CRUD de pacientes
-    path('favicon.ico', empty_favicon, name='favicon'),  # Favicon
+    path('auth/login/', login, name='login'),
+    path('auth/register/', register, name='register'),
+    path('pacientes/', PacientesListCreateView.as_view(), name='pacientes_list_create'),
+    path('pacientes/<int:id>/', PacienteDetailView.as_view(), name='paciente_detail'),
 ]

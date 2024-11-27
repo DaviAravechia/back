@@ -18,7 +18,8 @@ class Pacientes(models.Model):
         max_length=15, 
         validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Número de telefone inválido.")]
     )
-    historico_medico = models.TextField(blank=True, null=True)  # Opcional
+    historico_medico = models.TextField(blank=True, null=True)
+    email = models.EmailField(unique=True, blank=False)  
     cpf = models.CharField(
         max_length=11,
         validators=[RegexValidator(r'^\d{11}$', message="CPF deve conter 11 dígitos.")]
@@ -52,3 +53,4 @@ def empty_favicon(request):
 
 def api_root(request):
     return JsonResponse({"message": "Bem-vindo à API!"})
+
