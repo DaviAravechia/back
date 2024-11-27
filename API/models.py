@@ -27,6 +27,18 @@ class Pacientes(models.Model):
     def __str__(self):
         return self.nome
 
+class Medico(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    nome = models.CharField(max_length=255)
+    crm = models.CharField(max_length=7)
+    telefone = models.CharField(
+        max_length=15, 
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Número de telefone inválido.")]
+    )
+    email = models.EmailField(max_length=254)
+    especialidade = models.CharField(max_length=100)
+    data_nascimento = models.DateField()
+
 
 class Consultas(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)

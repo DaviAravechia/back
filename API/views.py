@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from .serializers import UserSerializer
 from .models import Pacientes
 from django.http import JsonResponse, HttpResponse
-from serializers import PacientesSerializer
+from .serializers import PacientesSerializer
 
 
 
