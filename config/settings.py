@@ -33,12 +33,13 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    'rest_framework_simplejwt',
     'drf_yasg',
     'API',
     'corsheaders',
     'gunicorn',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -160,11 +161,14 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
-REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES': [ 'rest_framework_simplejwt.authentication.JWTAuthentication', ],
-'DEFAULT_PERMISSION_CLASSES': [
-'rest_framework.permissions.IsAuthenticated', ],
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Permissão padrão: autenticado
+    ],
 }
-
 from datetime import timedelta 
 SIMPLE_JWT = { 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
 'REFRESH_TOKEN_LIFETIME': timedelta(days=1),

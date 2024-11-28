@@ -1,46 +1,12 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from config import settings
-from API.views import empty_favicon  # Certifique-se de importar a função corretamente
-from rest_framework import permissions
+from rest_framework.authtoken.views import obtain_auth_token
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from rest_framework import permissions
+from API.views import empty_favicon
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('API.urls')),  # Inclui as rotas do app API
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-# Rotas adicionais, como autenticação JWT e favicon
-urlpatterns += [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('favicon.ico', empty_favicon, name='favicon'),
-]
-
-
+# Swagger schema view
 schema_view = get_schema_view(
     openapi.Info(
         title="API Documentation",
@@ -48,11 +14,23 @@ schema_view = get_schema_view(
         description="Documentação da API",
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('api/', include('API.urls')),  # Substitua 'API' pelo nome correto do app
+
+    # API Endpoints
+    path('api/', include('API.urls')),  # Inclui as rotas do app API
+
+    # Authentication Endpoints
+    path('api/auth/token-login/', obtain_auth_token, name='token_auth_login'),  # Autenticação via Token
+    path('api/auth/jwt-login/', TokenObtainPairView.as_view(), name='jwt_token_login'),  # Login via JWT
+    path('api/auth/jwt-refresh/', TokenRefreshView.as_view(), name='jwt_token_refresh'),  # Atualização de JWT
+
+    # Swagger Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+
+    # Favicon Handler
+    path('favicon.ico', empty_favicon, name='favicon'),
 ]

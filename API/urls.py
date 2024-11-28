@@ -1,9 +1,17 @@
 from django.urls import path
-from .views import register, postpacientes, api_root, empty_favicon
+from .views import (
+    create_paciente, list_pacientes, update_paciente, delete_paciente,
+    agendar_consulta, listar_consultas_por_paciente
+)
 
 urlpatterns = [
-    path('', api_root, name='api_root'),  # Rota base para '/api/'
-    path('auth/register/', register, name='register'),  # Registro de usuários
-    path('restrito/pacientes/', postpacientes, name='postpacientes'),  # CRUD de pacientes
-    path('favicon.ico', empty_favicon, name='favicon'),  # Favicon
+    # Pacientes
+    path('paciente/', list_pacientes, name='list_pacientes'),
+    path('paciente/create/', create_paciente, name='create_paciente'),
+    path('paciente/<uuid:id>/', update_paciente, name='update_paciente'),
+    path('paciente/<uuid:id>/delete/', delete_paciente, name='delete_paciente'),
+
+    # Consultas
+    path('paciente/<uuid:paciente_id>/consultas/', listar_consultas_por_paciente, name='listar_consultas_por_paciente'),
+    path('consulta/', agendar_consulta, name='agendar_consulta'),
 ]
