@@ -2,6 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 
 
 from .models import Pacientes, Consultas, Medico
@@ -90,7 +92,22 @@ def create_paciente(request):
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
-
+@api_view(['POST'])
+def register_user(request):
+    """
+    Registra um novo usuário.
+    """
+    try:
+        data = request.data
+        user = User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password']
+        )
+        user.save()
+        return Response({"message": "Usuário registrado com sucesso!"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

@@ -13,8 +13,9 @@ class Pacientes(models.Model):
     email = models.EmailField(unique=True, blank=True, null=True)
     historico_medico = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return self.nome
+    class Meta:
+        verbose_name = "Paciente"
+        verbose_name_plural = "Pacientes"
 
 class Consultas(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
@@ -23,8 +24,9 @@ class Consultas(models.Model):
     descricao = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=50, choices=[('agendada', 'Agendada'), ('concluida', 'Concluída'), ('cancelada', 'Cancelada')])
 
-    def __str__(self):
-        return f"{self.paciente.nome} - {self.data_hora}"
+    class Meta:
+        verbose_name = "Consulta"
+        verbose_name_plural = "Consultas"
 
 class Medico(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
@@ -32,6 +34,6 @@ class Medico(models.Model):
     crm = models.CharField(max_length=20, unique=True)
     telefone = models.CharField(max_length=15)
 
-    def __str__(self):
-        return self.nome
-
+    class Meta:
+        verbose_name = "Médico"
+        verbose_name_plural = "Médicos"

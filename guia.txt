@@ -1,0 +1,52 @@
+1. Estrutura Inicial para o Front-End
+Com base na sua tela do Django Admin, você tem três áreas principais:
+
+Pacientes
+Consultas
+Médicos
+Você pode criar três seções no front-end para gerenciar essas entidades, garantindo que os dados sejam bem organizados e acessíveis.
+
+2. Planejamento do Esboço para o Front-End
+Divisão das Funcionalidades
+Pacientes:
+
+Listar pacientes.
+Criar/editar/excluir pacientes.
+Visualizar informações detalhadas de um paciente (ex.: histórico médico).
+Consultas:
+
+Listar consultas.
+Criar/editar/cancelar consultas.
+Exibir as consultas associadas a um paciente.
+Médicos (opcional no momento):
+
+Listar médicos cadastrados.
+Criar/editar/excluir médicos.
+Proposta para Layout (Esboço Inicial)
+Use um layout com três abas ou um menu lateral para acessar Pacientes, Consultas e Médicos.
+Cada aba exibe uma lista (com paginação, se necessário) e botões para adicionar ou editar itens.
+3. Endpoints para o Front-End
+Baseado nas rotas disponíveis na API, aqui estão os endpoints que você pode usar no front-end:
+
+Pacientes
+Listar todos os pacientes: GET /api/paciente/
+Criar paciente: POST /api/paciente/create/
+Editar paciente: PUT /api/paciente/<uuid:id>/
+Excluir paciente: DELETE /api/paciente/<uuid:id>/delete/
+Consultas
+Listar consultas de um paciente: GET /api/paciente/<uuid:paciente_id>/consultas/
+Criar consulta: POST /api/consulta/
+Editar consulta: PUT /api/consulta/<uuid:id>/
+Cancelar consulta: DELETE /api/consulta/<uuid:id>/
+Médicos (se aplicável):
+Listar médicos: Use um endpoint semelhante, como GET /api/medico/.
+4. Proposta de Ferramentas e Tecnologias
+Para criar o front-end robusto:
+
+Biblioteca/Framework:
+
+React.js: Para criar interfaces reativas e dinâmicas.
+Bootstrap ou Material-UI: Para estilização rápida e responsiva.
+Cliente HTTP:
+
+Use Axios ou Fetch API para consumir os endpoints da API.
