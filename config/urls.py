@@ -5,6 +5,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from API.views import empty_favicon
+from rest_framework import permissions
 
 # Swagger schema view
 schema_view = get_schema_view(
@@ -14,6 +15,7 @@ schema_view = get_schema_view(
         description="Documentação da API",
     ),
     public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [

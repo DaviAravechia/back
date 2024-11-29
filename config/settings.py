@@ -89,7 +89,6 @@ from decouple import config
 import dj_database_url
 
 DB_URL = config('DB_URL', default=os.getenv('DB_URL', None))
-print("Valor de DB_URL:", DB_URL)
 DATABASES = {
     'default' : dj_database_url.config(default = DB_URL)
 }
