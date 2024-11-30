@@ -20,3 +20,28 @@ Atualizando os dados do Git para o VScode
 git checkout dev (entrando na Branch)
 git pull origin dev(atualizando a branch no VScode)
 
+Rotas Disponíveis
+Aqui está o mapeamento das rotas disponíveis:
+
+Pacientes
+Listar Pacientes:
+GET /paciente/
+
+Criar Paciente:
+POST /paciente/create/
+
+Atualizar Paciente:
+PUT /paciente/<uuid:id>/
+
+Deletar Paciente:
+DELETE /paciente/<uuid:id>/delete/
+
+Registrar Usuário:
+POST /auth/novo/
+
+Consultas
+Listar Consultas de um Paciente:
+GET /paciente/<uuid:paciente_id>/consultas/
+
+Agendar Consulta:
+POST /consulta/

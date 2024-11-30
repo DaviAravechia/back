@@ -4,8 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-
-
 from .models import Pacientes, Consultas, Medico
 from .serializers import PacientesSerializer, ConsultasSerializer, MedicoSerializer
 
@@ -176,11 +174,7 @@ def delete_consulta(request, id):
         return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from .models import Consultas
-from .serializers import ConsultasSerializer
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
