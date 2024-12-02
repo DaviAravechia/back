@@ -1,9 +1,5 @@
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
-from django.http import JsonResponse
-from django.http import HttpResponse
 
 class Pacientes(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
@@ -17,23 +13,32 @@ class Pacientes(models.Model):
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
 
-class Consultas(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
-    paciente = models.ForeignKey(Pacientes, on_delete=models.CASCADE, related_name='consultas')
-    data_hora = models.DateTimeField()
-    descricao = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=50, choices=[('agendada', 'Agendada'), ('concluida', 'Concluída'), ('cancelada', 'Cancelada')])
-
-    class Meta:
-        verbose_name = "Consulta"
-        verbose_name_plural = "Consultas"
 
 class Medico(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     nome = models.CharField(max_length=255)
     crm = models.CharField(max_length=20, unique=True)
     telefone = models.CharField(max_length=15)
+    especialidade = models.CharField(max_length=100, blank=True, null=True)  # Adicionado campo de especialidade
 
     class Meta:
         verbose_name = "Médico"
         verbose_name_plural = "Médicos"
+
+
+class Consultas(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    paciente = models.ForeignKey(Pacientes, on_delete=models.CASCADE, related_name='consultas')
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='consultas')
+    data_hora = models.DateTimeField()
+    descricao = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=50,
+        choices=[('agendada', 'Agendada'), ('concluida', 'Concluída'), ('cancelada', 'Cancelada')],
+        default='agendada'  # Valor padrão
+    )
+
+    class Meta:
+        verbose_name = "Consulta"
+        verbose_name_plural = "Consultas"
+
