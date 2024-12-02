@@ -74,7 +74,7 @@ def create_medico(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def create_paciente(request):
     serializer = PacientesSerializer(data=request.data)
     if serializer.is_valid():
