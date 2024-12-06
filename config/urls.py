@@ -26,7 +26,7 @@ urlpatterns = [
     path('api/', include('API.urls')),  # Inclui as rotas do app API
 
     # Authentication Endpoints
-    path('api/auth/token-login/', obtain_auth_token, name='token_auth_login'),  # Autenticação via Token
+    # path('api/auth/token-login/', obtain_auth_token, name='token_auth_login'),  # Autenticação via Token
     path('api/auth/jwt-login/', TokenObtainPairView.as_view(), name='jwt_token_login'),  # Login via JWT
     path('api/auth/jwt-refresh/', TokenRefreshView.as_view(), name='jwt_token_refresh'),  # Atualização de JWT
 
