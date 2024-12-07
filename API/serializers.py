@@ -7,8 +7,7 @@ class PacientesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pacientes
-        fields = '__all__'
-        extra_fields = ['total_consultas']
+        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'historico_medico', 'user']
 
 
 class MedicoSerializer(serializers.ModelSerializer):

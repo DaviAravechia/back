@@ -42,3 +42,13 @@ GET /paciente/<uuid:paciente_id>/consultas/
 
 Agendar Consulta:
 POST /consulta/ 
+
+
+Método HTTP	Endpoint	Descrição
+GET	/pacientes/	Lista todos os pacientes
+POST	/pacientes/	Cria um novo paciente
+GET	/pacientes/<uuid:id>/	Recupera detalhes de um paciente
+PUT	/pacientes/<uuid:id>/update/	Atualiza um paciente específico
+DELETE	/pacientes/<uuid:id>/delete/	Deleta um paciente específico
+GET	/medicos/	Lista todos os médicos
+POST	/auth/novo/	Cria um novo usuário

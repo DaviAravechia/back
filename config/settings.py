@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,8 +87,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-from decouple import config
-import dj_database_url
+
 
 DB_URL = config('DB_URL', default=os.getenv('DB_URL', None))
 DATABASES = {
@@ -173,3 +174,5 @@ SIMPLE_JWT = { 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
 'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 'ROTATE_REFRESH_TOKENS': False,	'BLACKLIST_AFTER_ROTATION': True, 
 }
+
+AUTH_USER_MODEL = 'API.CustomUser'

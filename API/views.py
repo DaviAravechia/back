@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from .models import Pacientes, Consultas, Medico
+from .models import Pacientes, Consultas, Medico, CustomUser
 from .serializers import PacientesSerializer, ConsultasSerializer, MedicoSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 
 # Pacientes ViewSet
@@ -44,11 +46,30 @@ class ConsultaViewSet(ModelViewSet):
         """
         Agenda uma nova consulta.
         """
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        data = request.data
+        try:
+            paciente = Pacientes.objects.get(user=request.user)
+            medico = Medico.objects.get(uuid=data['medico_uuid'])
+            data_hora = data['data_hora']
+
+            # Verifica disponibilidade
+            if Consultas.objects.filter(medico=medico, data_hora=data_hora).exists():
+                return Response({"error": "O médico não está disponível nesse horário."}, status=status.HTTP_400_BAD_REQUEST)
+
+            consulta = Consultas.objects.create(
+                paciente=paciente,
+                medico=medico,
+                data_hora=data_hora,
+                observacoes=data.get('observacoes', '')
+            )
+            serializer = ConsultasSerializer(consulta)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Pacientes.DoesNotExist:
+            return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Medico.DoesNotExist:
+            return Response({"error": "Médico não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Funções Individuais
@@ -60,14 +81,13 @@ def update_paciente(request, id):
     """
     try:
         paciente = Pacientes.objects.get(uuid=id)
+        serializer = PacientesSerializer(paciente, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Pacientes.DoesNotExist:
         return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-    serializer = PacientesSerializer(paciente, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
@@ -82,38 +102,6 @@ def delete_paciente(request, id):
         return Response({"message": "Paciente excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
     except Pacientes.DoesNotExist:
         return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])
-def atualizar_consulta(request, id):
-    """
-    Atualiza parcialmente as informações de uma consulta.
-    """
-    try:
-        consulta = Consultas.objects.get(uuid=id)
-    except Consultas.DoesNotExist:
-        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
-
-    serializer = ConsultasSerializer(consulta, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def cancelar_consulta(request, id):
-    """
-    Cancela uma consulta com base no UUID.
-    """
-    try:
-        consulta = Consultas.objects.get(uuid=id)
-        consulta.delete()
-        return Response({"message": "Consulta cancelada com sucesso."}, status=status.HTTP_204_NO_CONTENT)
-    except Consultas.DoesNotExist:
-        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -135,18 +123,58 @@ def register_user(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_patient(request):
+    """
+    Registra um novo paciente.
+    """
+    try:
+        data = request.data
+        if CustomUser.objects.filter(email=data['email']).exists():
+            return Response({"error": "E-mail já registrado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = CustomUser.objects.create_user(
+            username=data['email'],
+            email=data['email'],
+            password=data['password'],
+            is_patient=True
+        )
+        Pacientes.objects.create(
+            user=user,
+            nome=data['nome'],
+            data_nascimento=data['data_nascimento'],
+            telefone=data['telefone'],
+            email=data['email'],
+            historico_medico=data.get('historico_medico', '')
+        )
+        return Response({"message": "Paciente registrado com sucesso!"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def login_user(request):
+    """
+    Login de usuários com JWT.
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'is_patient': getattr(user, 'is_patient', False),
+            'is_staff_user': getattr(user, 'is_staff_user', False),
+        })
+    return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 def empty_favicon(request):
     """
     Retorna uma resposta vazia para evitar erro 404 ao buscar favicon.
     """
     return HttpResponse("", content_type="image/x-icon")
-
-
-def create(self, request, *args, **kwargs):
-    print("Dados recebidos no back-end:", request.data)
-    serializer = self.get_serializer(data=request.data)
-    if not serializer.is_valid():
-        print("Erros na validação:", serializer.errors)
-    serializer.is_valid(raise_exception=True)
-    self.perform_create(serializer)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
