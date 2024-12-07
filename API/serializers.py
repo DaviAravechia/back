@@ -1,13 +1,12 @@
 from rest_framework import serializers
 from .models import Pacientes, Medico, Consultas
 
-
 class PacientesSerializer(serializers.ModelSerializer):
     total_consultas = serializers.IntegerField(source='consultas.count', read_only=True)
 
     class Meta:
         model = Pacientes
-        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'historico_medico', 'user']
+        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'historico_medico', 'user', 'total_consultas']  # Inclua 'total_consultas' aqui
 
 
 class MedicoSerializer(serializers.ModelSerializer):

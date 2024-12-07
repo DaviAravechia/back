@@ -178,3 +178,34 @@ def empty_favicon(request):
     Retorna uma resposta vazia para evitar erro 404 ao buscar favicon.
     """
     return HttpResponse("", content_type="image/x-icon")
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def cancelar_consulta(request, id):
+    """
+    Cancela uma consulta com base no UUID.
+    """
+    try:
+        consulta = Consultas.objects.get(uuid=id)
+        consulta.delete()
+        return Response({"message": "Consulta cancelada com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    except Consultas.DoesNotExist:
+        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def atualizar_consulta(request, id):
+    """
+    Atualiza parcialmente as informações de uma consulta.
+    """
+    try:
+        consulta = Consultas.objects.get(uuid=id)
+    except Consultas.DoesNotExist:
+        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ConsultasSerializer(consulta, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
