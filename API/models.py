@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 import uuid
+from django.core.validators import RegexValidator
 
 class CustomUser(AbstractUser):
     is_patient = models.BooleanField(default=False)
@@ -25,7 +26,19 @@ class Pacientes(models.Model):
     data_nascimento = models.DateField()
     telefone = models.CharField(max_length=15)
     email = models.EmailField(unique=True, blank=True, null=True)
-    historico_medico = models.TextField(blank=True, null=True)
+    cpf = models.CharField(
+        max_length=11,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{11}$',
+                message="O CPF deve conter exatamente 11 dígitos numéricos.",
+            )
+        ],
+        verbose_name="CPF"
+    )
+    # O campo historico_medico foi removido
+    # historico_medico = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Paciente"

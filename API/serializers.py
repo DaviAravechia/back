@@ -6,13 +6,13 @@ class PacientesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pacientes
-        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'historico_medico', 'user', 'total_consultas']  # Inclua 'total_consultas' aqui
+        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'cpf', 'user', 'total_consultas']
 
-
+        
 class MedicoSerializer(serializers.ModelSerializer):
-    crm = serializers.RegexField(
-        regex=r'^\d{4,6}-[A-Za-z]{2}$',
-        error_messages={'invalid': 'O CRM deve seguir o formato 123456-XX.'}
+    crm = serializers.CharField(
+        max_length=20,
+        error_messages={'blank': 'O CRM não pode estar em branco.'}
     )
 
     class Meta:

@@ -32,12 +32,19 @@ class PacienteViewSet(ModelViewSet):
 class MedicoViewSet(ModelViewSet):
     queryset = Medico.objects.all()
     serializer_class = MedicoSerializer
-    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        print("Dados recebidos no POST:", request.data)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        print("Dados recebidos no PUT:", request.data)
+        return super().update(request, *args, **kwargs)
 
 
 # Consultas ViewSet
 class ConsultaViewSet(ModelViewSet):
-    queryset = Consultas.objects.all()
+    queryset = Consultas.objects.select_related('paciente', 'medico').all()
     serializer_class = ConsultasSerializer
     permission_classes = [IsAuthenticated]
 
