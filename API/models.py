@@ -37,8 +37,8 @@ class Pacientes(models.Model):
         ],
         verbose_name="CPF"
     )
-    # O campo historico_medico foi removido
-    # historico_medico = models.TextField(blank=True, null=True)
+    historico_medico = models.TextField(max_length=255,blank=True, null=True)
+
 
     class Meta:
         verbose_name = "Paciente"
@@ -71,8 +71,4 @@ class Consultas(models.Model):
         verbose_name = "Consulta"
         verbose_name_plural = "Consultas"
 
-class Funcionarios(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
-    data_nascimento = models.DateField()
-    telefone = models.CharField(max_length=15)
-    email = models.EmailField(unique=True, blank=True, null=True)
+

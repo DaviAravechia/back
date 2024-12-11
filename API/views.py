@@ -152,6 +152,7 @@ def register_patient(request):
             nome=data['nome'],
             data_nascimento=data['data_nascimento'],
             telefone=data['telefone'],
+            cpf=data['cpf'],
             email=data['email'],
             historico_medico=data.get('historico_medico', '')
         )
