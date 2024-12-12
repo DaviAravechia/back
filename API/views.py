@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Pacientes, Consultas, Medico, CustomUser
 from .serializers import PacientesSerializer, ConsultasSerializer, MedicoSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -217,3 +217,10 @@ def atualizar_consulta(request, id):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])	
+@permission_classes([IsAuthenticated])
+def listar_consultas(request):
+    usuario = request.user  # Usuário autenticado
+    consulta = Consultas.objects.filter(usuario=usuario)
+    return JsonResponse(list(consulta.values()), safe=False)

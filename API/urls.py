@@ -7,7 +7,7 @@ from .views import (
     PacienteViewSet, ConsultaViewSet, MedicoViewSet,
     register_user,  delete_paciente,
     empty_favicon, login_user, register_patient , cancelar_consulta, atualizar_consulta,
-    update_paciente# Import correto
+    update_paciente, listar_consultas,# Import correto
     
 )
 
@@ -28,6 +28,7 @@ urlpatterns = [
     path('consultas/<uuid:id>/cancel/', cancelar_consulta, name='cancelar_consulta'),
     path('auth/register-patient/', register_patient, name='register_patient'),
     path('auth/login/', login_user, name='login_user'),
+    path('consultas/<uuid>/get/', listar_consultas, name='get_consultas'),
     # Registro de usuário
     path('auth/novo/', register_user, name='register_user'),
 
