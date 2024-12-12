@@ -1,0 +1,71 @@
+Passo a Passo para o Front
+
+git clone https://github.com/DaviAravechia/front.git
+
+cd front
+cd web
+npm install
+
+npm run dev
+
+
+Dúvidas Sobre as Rotas
+Aqui está um resumo das rotas e seus propósitos no sistema:
+
+Pacientes
+Listar Pacientes:
+
+Método: GET
+URL: /api/paciente/
+Descrição: Retorna uma lista de todos os pacientes.
+Criar Paciente:
+
+Método: POST
+URL: /api/paciente/create/
+Descrição: Cria um novo paciente. O corpo da requisição deve conter os dados necessários (nome, data de nascimento, etc.).
+Atualizar Paciente:
+
+Método: PUT
+URL: /api/paciente/<uuid:id>/
+Descrição: Atualiza os dados de um paciente específico.
+Excluir Paciente:
+
+Método: DELETE
+URL: /api/paciente/<uuid:id>/delete/
+Descrição: Exclui um paciente específico.
+Consultas
+Listar Consultas de um Paciente:
+
+Método: GET
+URL: /api/paciente/<uuid:paciente_id>/consultas/
+Descrição: Lista todas as consultas de um paciente específico.
+Agendar Consulta:
+
+Método: POST
+URL: /api/consulta/
+Descrição: Cria uma nova consulta. O corpo da requisição deve incluir o ID do paciente e outros detalhes.
+
+
+
+/src
+  /components
+    /Auth
+      - Login.js - ok 
+      - Register.js
+    /Pacientes
+      - ListarPacientes.js - ok 
+      - CadastrarPaciente.js - ok 
+      - AtualizarPaciente.js - ok 
+    /Consultas
+      - ListarConsultas.js
+      - AgendarConsulta.js
+      - AtualizarConsulta.js
+  /services
+    - api.js
+  /routes
+    - ProtectedRoute.js
+    - Routes.js
+  /context
+    - AuthContext.js
+  - App.js
+  - index.js

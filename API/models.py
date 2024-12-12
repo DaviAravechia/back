@@ -1,57 +1,74 @@
-import uuid
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
-from django.contrib.auth.models import User
+import uuid
 from django.core.validators import RegexValidator
-from django.http import JsonResponse
-from django.http import HttpResponse
+
+class CustomUser(AbstractUser):
+    is_patient = models.BooleanField(default=False)
+    is_staff_user = models.BooleanField(default=False)
+
+    # Sobrescrevendo os campos para evitar conflitos
+    groups = models.ManyToManyField(
+        Group,
+        related_name="customuser_groups",  # Nome único para evitar conflito
+        blank=True,
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="customuser_permissions",  # Nome único para evitar conflito
+        blank=True,
+    )
 
 class Pacientes(models.Model):
-    user_id = models.OneToOneField(
-        User,  # Relaciona um paciente ao modelo User
-        on_delete=models.CASCADE,  # Exclui o paciente se o usuário for excluído
-        related_name='paciente',
-        # Facilita consultas reversas,
-        null = True,
-        blank=True
-    )
-    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, )
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="paciente")
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     nome = models.CharField(max_length=255)
     data_nascimento = models.DateField()
-    telefone = models.CharField(
-        max_length=15, 
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Número de telefone inválido.")]
-    )
-    historico_medico = models.TextField(blank=True, null=True)  # Opcional
+    telefone = models.CharField(max_length=15)
+    email = models.EmailField(unique=True, blank=True, null=True)
     cpf = models.CharField(
         max_length=11,
-        validators=[RegexValidator(r'^\d{11}$', message="CPF deve conter 11 dígitos.")]
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{11}$',
+                message="O CPF deve conter exatamente 11 dígitos numéricos.",
+            )
+        ],
+        verbose_name="CPF"
     )
+    historico_medico = models.TextField(max_length=255,blank=True, null=True)
 
-    def __str__(self):
-        return self.nome
 
+    class Meta:
+        verbose_name = "Paciente"
+        verbose_name_plural = "Pacientes"
+
+class Medico(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    nome = models.CharField(max_length=255)
+    crm = models.CharField(max_length=20, unique=True)
+    telefone = models.CharField(max_length=15)
+    especialidade = models.CharField(max_length=100, blank=True, null=True)  # Adicionado campo de especialidade
+
+    class Meta:
+        verbose_name = "Médico"
+        verbose_name_plural = "Médicos"
 
 class Consultas(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    paciente = models.ForeignKey(Pacientes, on_delete=models.CASCADE)
-    data_e_hora_consulta = models.DateTimeField()
-    descricao = models.TextField(blank=True, null=True)  # Opcional
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    paciente = models.ForeignKey(Pacientes, on_delete=models.CASCADE, related_name='consultas')
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='consultas')
+    data_hora = models.DateTimeField()
+    descricao = models.TextField(blank=True, null=True)
     status = models.CharField(
-        max_length=20,
-        choices=[
-            ('agendada', 'Agendada'),
-            ('concluida', 'Concluída'),
-            ('cancelada', 'Cancelada')
-        ],
-        default='agendada'
+        max_length=50,
+        choices=[('agendada', 'Agendada'), ('concluida', 'Concluída'), ('cancelada', 'Cancelada')],
+        default='agendada'  # Valor padrão
     )
 
-    def __str__(self):
-        return f"Consulta de {self.paciente.nome} em {self.data_e_hora_consulta}"
+    class Meta:
+        verbose_name = "Consulta"
+        verbose_name_plural = "Consultas"
 
 
-def empty_favicon(request):
-    return HttpResponse("", content_type="image/x-icon")
-
-def api_root(request):
-    return JsonResponse({"message": "Bem-vindo à API!"})

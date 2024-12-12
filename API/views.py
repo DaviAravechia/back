@@ -1,66 +1,226 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
-from .serializers import UserSerializer
-from .models import Pacientes
-from django.http import JsonResponse, HttpResponse
-from .serializers import PacientesSerializer
+from django.contrib.auth.models import User
+from django.http import HttpResponse, JsonResponse
+from .models import Pacientes, Consultas, Medico, CustomUser
+from .serializers import PacientesSerializer, ConsultasSerializer, MedicoSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 
+# Pacientes ViewSet
+class PacienteViewSet(ModelViewSet):
+    queryset = Pacientes.objects.all()
+    serializer_class = PacientesSerializer
+    permission_classes = [IsAuthenticated]
 
-@swagger_auto_schema(
-    methods=['POST'],
-    request_body=UserSerializer,
-    tags=['token'],
-)
+    @action(detail=True, methods=['GET'])
+    def consultas(self, request, pk=None):
+        """
+        Lista todas as consultas associadas a um paciente específico.
+        """
+        paciente = self.get_object()
+        consultas = Consultas.objects.filter(paciente=paciente)
+        serializer = ConsultasSerializer(consultas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# Médicos ViewSet
+class MedicoViewSet(ModelViewSet):
+    queryset = Medico.objects.all()
+    serializer_class = MedicoSerializer
+
+    def create(self, request, *args, **kwargs):
+        print("Dados recebidos no POST:", request.data)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        print("Dados recebidos no PUT:", request.data)
+        return super().update(request, *args, **kwargs)
+
+
+# Consultas ViewSet
+class ConsultaViewSet(ModelViewSet):
+    queryset = Consultas.objects.select_related('paciente', 'medico').all()
+    serializer_class = ConsultasSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['POST'])
+    def agendar(self, request):
+        """
+        Agenda uma nova consulta.
+        """
+        data = request.data
+        try:
+            paciente = Pacientes.objects.get(user=request.user)
+            medico = Medico.objects.get(uuid=data['medico_uuid'])
+            data_hora = data['data_hora']
+
+            # Verifica disponibilidade
+            if Consultas.objects.filter(medico=medico, data_hora=data_hora).exists():
+                return Response({"error": "O médico não está disponível nesse horário."}, status=status.HTTP_400_BAD_REQUEST)
+
+            consulta = Consultas.objects.create(
+                paciente=paciente,
+                medico=medico,
+                data_hora=data_hora,
+                observacoes=data.get('observacoes', '')
+            )
+            serializer = ConsultasSerializer(consulta)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Pacientes.DoesNotExist:
+            return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Medico.DoesNotExist:
+            return Response({"error": "Médico não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Funções Individuais
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_paciente(request, id):
+    """
+    Atualiza parcialmente as informações de um paciente.
+    """
+    try:
+        paciente = Pacientes.objects.get(uuid=id)
+        serializer = PacientesSerializer(paciente, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Pacientes.DoesNotExist:
+        return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_paciente(request, id):
+    """
+    Exclui um paciente com base no UUID.
+    """
+    try:
+        paciente = Pacientes.objects.get(uuid=id)
+        paciente.delete()
+        return Response({"message": "Paciente excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    except Pacientes.DoesNotExist:
+        return Response({"error": "Paciente não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def register(request):
+def register_user(request):
     """
-    View para registrar um novo usuário.
+    Registra um novo usuário.
     """
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(
-            {"username": serializer.data["username"]},
-            status=status.HTTP_201_CREATED
+    try:
+        data = request.data
+        user = User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password']
         )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user.save()
+        return Response({"message": "Usuário registrado com sucesso!"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(
-    methods=['POST'],
-    request_body=PacientesSerializer,
-    tags=['pacientes'],
-)
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def postpacientes(request):
+def register_patient(request):
     """
-    View para criar um novo paciente associado a um usuário.
+    Registra um novo paciente.
     """
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        paciente = serializer.save()
-        return Response(
-            # {"id": paciente.uuid, "nome": paciente.nome},
-            status=status.HTTP_201_CREATED
+    try:
+        data = request.data
+        if CustomUser.objects.filter(email=data['email']).exists():
+            return Response({"error": "E-mail já registrado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = CustomUser.objects.create_user(
+            username=data['email'],
+            email=data['email'],
+            password=data['password'],
+            is_patient=True
         )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        Pacientes.objects.create(
+            user=user,
+            nome=data['nome'],
+            data_nascimento=data['data_nascimento'],
+            telefone=data['telefone'],
+            cpf=data['cpf'],
+            email=data['email'],
+            historico_medico=data.get('historico_medico', '')
+        )
+        return Response({"message": "Paciente registrado com sucesso!"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def api_root(request):
+@api_view(['POST'])
+def login_user(request):
     """
-    View para exibir a mensagem inicial da API.
+    Login de usuários com JWT.
     """
-    return JsonResponse({"message": "Bem-vindo à API!"})
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'is_patient': getattr(user, 'is_patient', False),
+            'is_staff_user': getattr(user, 'is_staff_user', False),
+        })
+    return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def empty_favicon(request):
     """
-    View para evitar erro 404 ao buscar favicon.
+    Retorna uma resposta vazia para evitar erro 404 ao buscar favicon.
     """
     return HttpResponse("", content_type="image/x-icon")
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def cancelar_consulta(request, id):
+    """
+    Cancela uma consulta com base no UUID.
+    """
+    try:
+        consulta = Consultas.objects.get(uuid=id)
+        consulta.delete()
+        return Response({"message": "Consulta cancelada com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    except Consultas.DoesNotExist:
+        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def atualizar_consulta(request, id):
+    """
+    Atualiza parcialmente as informações de uma consulta.
+    """
+    try:
+        consulta = Consultas.objects.get(uuid=id)
+    except Consultas.DoesNotExist:
+        return Response({"error": "Consulta não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ConsultasSerializer(consulta, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])	
+@permission_classes([IsAuthenticated])
+def listar_consultas(request):
+    usuario = request.user  # Usuário autenticado
+    consulta = Consultas.objects.filter(usuario=usuario)
+    return JsonResponse(list(consulta.values()), safe=False)

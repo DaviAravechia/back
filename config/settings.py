@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,12 +35,13 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    'rest_framework_simplejwt',
     'drf_yasg',
     'API',
     'corsheaders',
     'gunicorn',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,11 +87,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-from decouple import config
-import dj_database_url
+
 
 DB_URL = config('DB_URL', default=os.getenv('DB_URL', None))
-print("Valor de DB_URL:", DB_URL)
 DATABASES = {
     'default' : dj_database_url.config(default = DB_URL)
 }
@@ -137,7 +138,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOWED_ORIGINS = [ "https://front-4smi.onrender.com"]
+CORS_ALLOWED_ORIGINS = [ "https://front-4smi.onrender.com","http://localhost:5173"]
 
 
 
@@ -160,13 +161,18 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
-REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES': [ 'rest_framework_simplejwt.authentication.JWTAuthentication', ],
-'DEFAULT_PERMISSION_CLASSES': [
-'rest_framework.permissions.IsAuthenticated', ],
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Permissão padrão: autenticado
+    ],
 }
-
 from datetime import timedelta 
 SIMPLE_JWT = { 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
 'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 'ROTATE_REFRESH_TOKENS': False,	'BLACKLIST_AFTER_ROTATION': True, 
 }
+
+AUTH_USER_MODEL = 'API.CustomUser'

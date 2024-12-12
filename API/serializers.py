@@ -1,40 +1,38 @@
 from rest_framework import serializers
-from .models import Pacientes, Consultas
-from django.contrib.auth.models import User
-
-class UserSerializer(serializers.ModelSerializer):
-    # Serializer para criar e gerenciar usuários
-    class Meta:
-        model = User
-        fields = ('username', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = User(username=validated_data['username'])
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
-
+from .models import Pacientes, Medico, Consultas
 
 class PacientesSerializer(serializers.ModelSerializer):
-    # Relaciona o usuário com o paciente
-    user_id = UserSerializer()
+    total_consultas = serializers.IntegerField(source='consultas.count', read_only=True)
 
     class Meta:
         model = Pacientes
-        fields = '__all__'
+        fields = ['uuid', 'nome', 'data_nascimento', 'telefone', 'email', 'cpf', 'user', 'total_consultas']
 
-    def create(self, validated_data):
-        user_data = validated_data.pop('user_id')  # Retira os dados do usuário
-        user = User.objects.create_user(**user_data)  # Cria o usuário
-        paciente = Pacientes.objects.create(user_id=user, **validated_data)  # Cria o paciente
-        return paciente
+        
+class MedicoSerializer(serializers.ModelSerializer):
+    crm = serializers.CharField(
+        max_length=20,
+        error_messages={'blank': 'O CRM não pode estar em branco.'}
+    )
+
+    class Meta:
+        model = Medico
+        fields = ['uuid', 'nome', 'crm', 'telefone', 'especialidade']
+
+
+class CustomDateTimeField(serializers.DateTimeField):
+    def to_representation(self, value):
+        return value.strftime('%d/%m/%Y %H:%M')
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(data)
 
 
 class ConsultasSerializer(serializers.ModelSerializer):
-    paciente_nome = serializers.ReadOnlyField(source='paciente.nome')  # Nome do paciente como campo adicional
+    paciente_nome = serializers.CharField(source='paciente.nome', read_only=True)
+    medico_nome = serializers.CharField(source='medico.nome', read_only=True)
+    data_hora = CustomDateTimeField()
 
     class Meta:
         model = Consultas
         fields = '__all__'
-
