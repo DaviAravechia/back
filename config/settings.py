@@ -30,7 +30,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = ["http://localhost:8000/", "https://back-vlzn.onrender.com"]
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
